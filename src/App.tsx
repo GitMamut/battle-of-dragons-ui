@@ -3,6 +3,10 @@ import "./App.css";
 import FighterBox from "./components/FighterBox";
 import FightersSelect from "./components/FightersSelect";
 
+//this definitly needs some clean-up and separation of logic from presentation layer
+//the smallMessage should be displayed with damage taken
+//some more graphical fireworks would be nice, if I had more time
+//also, error handling is missing, testing, I know they are missing, but I am out of time
 function App() {
   const [fighters, setFighters] = useState([]);
   const [mainMessage, setMainMessage] = useState("Fight!");
@@ -19,24 +23,28 @@ function App() {
       .catch((error) => console.error("Error fetching fighters:", error));
   }, []);
 
-  const handleSelectFighter1 = (id: number) => {
+  const handleSelectFighter1 = (id: string) => {
     setSelectedFighter1(id);
   };
 
-  const handleSelectFighter2 = (id: number) => {
+  const handleSelectFighter2 = (id: string) => {
     setSelectedFighter2(id);
+  };
+
+  const resetFighters = () => {
+    setSelectedFighter1("");
+    setSelectedFighter2("");
+    setFighter1Health(100);
+    setFighter2Health(100);
+    setMainMessage("Fight!");
   };
 
   const handleFight = () => {
     console.log(`Fighter 1: id: ${selectedFighter1} health: ${fighter1Health}`);
     console.log(`Fighter 2: id: ${selectedFighter2} health: ${fighter2Health}`);
 
-    if (fighter1Health < 1 || fighter2Health < 0) {
-      setSelectedFighter1("");
-      setSelectedFighter2("");
-      setFighter1Health(100);
-      setFighter2Health(100);
-      setMainMessage("Fight!");
+    if (fighter1Health < 1 || fighter2Health < 1) {
+      resetFighters();
       return;
     }
 
@@ -76,7 +84,7 @@ function App() {
         <div>
           {selectedFighter1 ? (
             <FighterBox
-              fighter={fighters[selectedFighter1]}
+              fighter={fighters[parseInt(selectedFighter1)]}
               health={fighter1Health}
             />
           ) : (
@@ -89,7 +97,7 @@ function App() {
         <div>
           {selectedFighter2 ? (
             <FighterBox
-              fighter={fighters[selectedFighter2]}
+              fighter={fighters[parseInt(selectedFighter2)]}
               health={fighter2Health}
             />
           ) : (

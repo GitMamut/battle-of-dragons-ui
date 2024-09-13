@@ -1,5 +1,8 @@
+import { Fighter } from "../interfaces/Fighter";
+
 interface FighterBoxProps {
-  name: string;
+  fighter: Fighter;
+  health: number;
 }
 
 function FighterBox({ fighter, health }: FighterBoxProps) {

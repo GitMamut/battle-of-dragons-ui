@@ -1,5 +1,8 @@
+import { Fighter } from "../interfaces/Fighter";
+
 interface FightersSelectProps {
-  fighters: [];
+  fighters: Fighter[];
+  onSelectFighter: (fighterId: string) => void;
 }
 
 function FightersSelect({ fighters, onSelectFighter }: FightersSelectProps) {
@@ -12,7 +15,7 @@ function FightersSelect({ fighters, onSelectFighter }: FightersSelectProps) {
       }}
     >
       <option value="">Select Fighter</option>
-      {fighters.map((fighter, index) => (
+      {fighters.map((fighter) => (
         <option key={fighter.name} value={fighter.id}>
           {fighter.name}
         </option>
