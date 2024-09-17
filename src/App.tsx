@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import FighterBox from "./components/FighterBox";
 import FightersSelect from "./components/FightersSelect";
+import { continueFight, startFight } from "./api/fight";
+import { getDragons } from "./api/dragons";
 
 //this definitly needs some clean-up and separation of logic from presentation layer
 //the smallMessage should be displayed with damage taken
@@ -9,111 +11,113 @@ import FightersSelect from "./components/FightersSelect";
 //also, error handling is missing, testing, I know they are missing, but I am out of time
 function App() {
   const [fighters, setFighters] = useState([]);
-  const [mainMessage, setMainMessage] = useState("Fight!");
-  const [smallMessage, setSmallMessage] = useState("Choose your fighters!");
-  const [selectedFighter1, setSelectedFighter1] = useState("");
-  const [selectedFighter2, setSelectedFighter2] = useState("");
-  const [fighter1Health, setFighter1Health] = useState(100);
-  const [fighter2Health, setFighter2Health] = useState(100);
+  const [mainMessage, setMainMessage] = useState("Choose your fighters!");
+  const [smallMessages, setSmallMessages] = useState<string[]>([]);
+  const [selectedFighters, setSelectedFighters] = useState<string[]>(["", ""]);
+  const [fightersHealth, setFightersHealth] = useState<number[]>([100, 100]);
+  const [fightId, setFightId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    fetch("http://localhost:3000/dragons")
-      .then((response) => response.json())
-      .then((data) => setFighters(data))
-      .catch((error) => console.error("Error fetching fighters:", error));
+    const fetchDragons = async () => {
+      const data = await getDragons();
+      setFighters(data);
+    };
+    fetchDragons();
   }, []);
 
-  const handleSelectFighter1 = (id: string) => {
-    setSelectedFighter1(id);
+  useEffect(() => {
+    if (selectedFighters[0] && selectedFighters[1]) {
+      setMainMessage("Fight!");
+    }
+  }, [selectedFighters]);
+
+  const handleSelectFighter = (index: number) => {
+    return (dragonId: string) => {
+      const newSelectedFighters = [...selectedFighters];
+      newSelectedFighters[index] = dragonId;
+      setSelectedFighters(newSelectedFighters);
+    };
   };
 
-  const handleSelectFighter2 = (id: string) => {
-    setSelectedFighter2(id);
-  };
-
-  const resetFighters = () => {
-    setSelectedFighter1("");
-    setSelectedFighter2("");
-    setFighter1Health(100);
-    setFighter2Health(100);
-    setMainMessage("Fight!");
-  };
-
-  const handleFight = () => {
-    console.log(`Fighter 1: id: ${selectedFighter1} health: ${fighter1Health}`);
-    console.log(`Fighter 2: id: ${selectedFighter2} health: ${fighter2Health}`);
-
-    if (fighter1Health < 1 || fighter2Health < 1) {
+  const handleFight = async () => {
+    if (fightersHealth.some((health) => health < 1)) {
       resetFighters();
       return;
     }
 
-    const requestBody = {
-      fighter1: {
-        id: Number(selectedFighter1),
-        health: fighter1Health,
-      },
-      fighter2: {
-        id: Number(selectedFighter2),
-        health: fighter2Health,
-      },
-    };
+    let newFightId = fightId;
+    if (!fightId) {
+      newFightId = await startFight(
+        Number(selectedFighters[0]),
+        Number(selectedFighters[1])
+      );
+      setFightId(newFightId);
+    }
 
-    fetch("http://localhost:3000/fight", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setMainMessage(data.message);
-        setFighter1Health(data.fighter1.newHealth);
-        setFighter2Health(data.fighter2.newHealth);
-        console.log(data);
-      })
-      .catch((error) => console.error("Error fetching fighters:", error));
+    if (newFightId) {
+      const fightData = await continueFight(newFightId);
+      if (fightData) {
+        setMainMessage(fightData.message);
+        setFightersHealth([
+          fightData.fighter1.newHealth,
+          fightData.fighter2.newHealth,
+        ]);
+        setSmallMessages([fightData.message, ...smallMessages]);
+        console.log(fightData);
+      }
+    }
+  };
+
+  const resetFighters = () => {
+    setSelectedFighters(["", ""]);
+    setFightersHealth([100, 100]);
+    setMainMessage("Choose your fighters!");
+    setSmallMessages([]);
+    setFightId(undefined);
   };
 
   return (
     <>
       <h1>The BATTLE OF DRAGONS!</h1>
-      {!(selectedFighter1 && selectedFighter2) && <div>{smallMessage}</div>}
+      <button
+        onClick={handleFight}
+        disabled={!(selectedFighters[0] && selectedFighters[1])}
+      >
+        {mainMessage}
+      </button>
       <div className="fighters-container">
         <div>
-          {selectedFighter1 ? (
+          {selectedFighters[0] ? (
             <FighterBox
-              fighter={fighters[parseInt(selectedFighter1)]}
-              health={fighter1Health}
+              fighter={fighters[Number(selectedFighters[0])]}
+              health={fightersHealth[0]}
             />
           ) : (
             <FightersSelect
               fighters={fighters}
-              onSelectFighter={handleSelectFighter1}
+              onSelectFighter={handleSelectFighter(0)}
             />
           )}
         </div>
         <div>
-          {selectedFighter2 ? (
+          {selectedFighters[1] ? (
             <FighterBox
-              fighter={fighters[parseInt(selectedFighter2)]}
-              health={fighter2Health}
+              fighter={fighters[Number(selectedFighters[1])]}
+              health={fightersHealth[1]}
             />
           ) : (
             <FightersSelect
               fighters={fighters}
-              onSelectFighter={handleSelectFighter2}
+              onSelectFighter={handleSelectFighter(1)}
             />
           )}
         </div>
       </div>
-      <button
-        disabled={!(selectedFighter1 && selectedFighter2)}
-        onClick={handleFight}
-      >
-        {mainMessage}
-      </button>
+      {smallMessages.map((message, index) => (
+        <p className={"small-message" + (index == 0 ? " first" : "")}>
+          {message}
+        </p>
+      ))}
     </>
   );
 }

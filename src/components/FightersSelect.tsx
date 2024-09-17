@@ -11,7 +11,6 @@ function FightersSelect({ fighters, onSelectFighter }: FightersSelectProps) {
       value={""}
       onChange={(e) => {
         onSelectFighter(e.target.value);
-        console.log(e.target.value);
       }}
     >
       <option value="">Select Fighter</option>

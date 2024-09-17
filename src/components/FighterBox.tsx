@@ -2,7 +2,7 @@ import { Fighter } from "../interfaces/Fighter";
 
 interface FighterBoxProps {
   fighter: Fighter;
-  health: number;
+  health: number | undefined;
 }
 
 function FighterBox({ fighter, health }: FighterBoxProps) {
@@ -12,7 +12,7 @@ function FighterBox({ fighter, health }: FighterBoxProps) {
       <p>Strenght: {fighter.strength}</p>
       <p>Size: {fighter.size}</p>
       <p>Type: {fighter.type}</p>
-      <p>Health: {health}</p>
+      {health !== undefined && <p>Health: {health}</p>}
     </>
   );
 }
