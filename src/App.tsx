@@ -18,6 +18,7 @@ function App() {
   const [fightId, setFightId] = useState<string | null>(null);
 
   useEffect(() => {
+    // use react query or something similar
     const fetchDragons = async () => {
       const data = await getDragons();
       setFighters(data);
