@@ -1,7 +1,7 @@
 export const startFight = async (
   fighter1Id: number,
   fighter2Id: number
-): Promise<string | undefined> => {
+): Promise<string | null> => {
   try {
     const response = await fetch("http://localhost:3000/fight/start", {
       method: "POST",
@@ -12,7 +12,7 @@ export const startFight = async (
     return data.newFightId;
   } catch (error) {
     console.error("Error starting fight:", error);
-    return undefined;
+    return null;
   }
 };
 

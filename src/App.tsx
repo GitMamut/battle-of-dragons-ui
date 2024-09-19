@@ -15,7 +15,7 @@ function App() {
   const [smallMessages, setSmallMessages] = useState<string[]>([]);
   const [selectedFighters, setSelectedFighters] = useState<string[]>(["", ""]);
   const [fightersHealth, setFightersHealth] = useState<number[]>([100, 100]);
-  const [fightId, setFightId] = useState<string | undefined>(undefined);
+  const [fightId, setFightId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDragons = async () => {
@@ -45,17 +45,17 @@ function App() {
       return;
     }
 
-    let newFightId = fightId;
+    let currentFightId = fightId;
     if (!fightId) {
-      newFightId = await startFight(
+      currentFightId = await startFight(
         Number(selectedFighters[0]),
         Number(selectedFighters[1])
       );
-      setFightId(newFightId);
+      setFightId(currentFightId);
     }
 
-    if (newFightId) {
-      const fightData = await continueFight(newFightId);
+    if (currentFightId) {
+      const fightData = await continueFight(currentFightId);
       if (fightData) {
         setMainMessage(fightData.message);
         setFightersHealth([
@@ -73,7 +73,7 @@ function App() {
     setFightersHealth([100, 100]);
     setMainMessage("Choose your fighters!");
     setSmallMessages([]);
-    setFightId(undefined);
+    setFightId(null);
   };
 
   return (
