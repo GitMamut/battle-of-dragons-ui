@@ -1,4 +1,4 @@
-import { Fighter } from "../interfaces/Fighter";
+import { Fighter } from "../types/Fighter";
 
 interface FightersSelectProps {
   fighters: Fighter[];

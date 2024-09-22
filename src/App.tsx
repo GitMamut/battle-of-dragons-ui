@@ -57,6 +57,7 @@ function App() {
         setSmallMessages([fightData.message, ...smallMessages]);
         console.log(fightData);
       }
+      //TODO add error handling
     }
   };
 

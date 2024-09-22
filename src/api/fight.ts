@@ -1,3 +1,5 @@
+import { FightResponse } from "../types/fight-rs";
+
 export const startFight = async (
   fighter1Id: number,
   fighter2Id: number
@@ -18,14 +20,7 @@ export const startFight = async (
 
 export const continueFight = async (
   fightId: string
-): Promise<
-  | {
-      message: string;
-      fighter1: { newHealth: number };
-      fighter2: { newHealth: number };
-    }
-  | undefined
-> => {
+): Promise<FightResponse | undefined> => {
   try {
     const response = await fetch(
       `http://localhost:3000/fight/continue/${fightId}`,
