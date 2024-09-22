@@ -4,6 +4,7 @@ import FighterBox from "./components/FighterBox";
 import FightersSelect from "./components/FightersSelect";
 import { continueFight, startFight } from "./api/fight";
 import { getDragonsFromTheServer as useFetchingDragons } from "./api/dragons";
+import SmallMessages from "./components/SmallMessages";
 
 //this definitly needs some clean-up and separation of logic from presentation layer
 //the smallMessage should be displayed with damage taken
@@ -32,7 +33,7 @@ function App() {
   };
 
   const handleFight = async () => {
-    if (fightersHealth.some((health) => health < 1)) {
+    if (fightersHealth.includes(0)) {
       resetFighters();
       return;
     }
@@ -54,7 +55,7 @@ function App() {
           fightData.fighter1.newHealth,
           fightData.fighter2.newHealth,
         ]);
-        setSmallMessages([fightData.message, ...smallMessages]);
+        setSmallMessages([...fightData.smallMessages, ...smallMessages]);
         console.log(fightData);
       }
       //TODO add error handling
@@ -106,11 +107,10 @@ function App() {
           )}
         </div>
       </div>
-      {smallMessages.map((message, index) => (
-        <p className={"small-message" + (index == 0 ? " first" : "")}>
-          {message}
-        </p>
-      ))}
+      <SmallMessages
+        messages={smallMessages}
+        capitilizeFirst={fightersHealth.includes(0)}
+      />
     </>
   );
 }
