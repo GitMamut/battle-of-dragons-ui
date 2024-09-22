@@ -3,28 +3,19 @@ import "./App.css";
 import FighterBox from "./components/FighterBox";
 import FightersSelect from "./components/FightersSelect";
 import { continueFight, startFight } from "./api/fight";
-import { getDragons } from "./api/dragons";
+import { getDragonsFromTheServer as useFetchingDragons } from "./api/dragons";
 
 //this definitly needs some clean-up and separation of logic from presentation layer
 //the smallMessage should be displayed with damage taken
 //some more graphical fireworks would be nice, if I had more time
 //also, error handling is missing, testing, I know they are missing, but I am out of time
 function App() {
-  const [fighters, setFighters] = useState([]);
+  const [fighters, setFighters] = useFetchingDragons();
   const [mainMessage, setMainMessage] = useState("Choose your fighters!");
   const [smallMessages, setSmallMessages] = useState<string[]>([]);
   const [selectedFighters, setSelectedFighters] = useState<string[]>(["", ""]);
   const [fightersHealth, setFightersHealth] = useState<number[]>([100, 100]);
   const [fightId, setFightId] = useState<string | null>(null);
-
-  useEffect(() => {
-    // use react query or something similar
-    const fetchDragons = async () => {
-      const data = await getDragons();
-      setFighters(data);
-    };
-    fetchDragons();
-  }, []);
 
   useEffect(() => {
     if (selectedFighters[0] && selectedFighters[1]) {
